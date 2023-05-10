@@ -2,15 +2,20 @@ pipeline {
     agent any
 
     stages {
-        stage('Git Clone') {
+        stage('Clone Code') {
             steps {
                 git 'https://github.com/ramdevops03/Development-Team-Repo.git'
             }
         }
         stage('Build Application Code') {
             steps {
-                sh 'mvn clean -f pom.xml'
+                sh 'mvn package -f pom.xml'
             }
         }
-     }
- }
+        stage('Upload Artifact to Nexus') {
+            steps {
+                nexusArtifactUploader artifacts: [[artifactId: 'web', classifier: '', file: 'target/web.war', type: 'war']], credentialsId: 'nexus_user', groupId: 'project', nexusUrl: '44.203.179.219:8081/nexus', nexusVersion: 'nexus2', protocol: 'http', repository: 'releases', version: '2.3'
+            }
+        }        
+    }
+}
